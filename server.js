@@ -96,7 +96,13 @@ app.get('/student1', authenticateToken, (req, res) => {
 })
 
 app.get('/student2', authenticateToken, (req, res) => {
-  res.render('student2.ejs')
+  if (!teacherRole.includes(currentUser.role)) {
+    if (currentUser.name !== 'student2') {
+      res.redirect('/identify')
+    }
+    res.render('student2.ejs', { user: currentUser })
+  }
+  res.render('student2.ejs', { user: currentUser })
 })
 
 app.get('/teacher', authenticateToken, (req, res) => {
