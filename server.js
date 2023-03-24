@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 app.post('/identify', async (req, res) => {
   const userId = req.body.userId
   const password = req.body.password
-  const token = jwt.sign(password, process.env.ACCESS_TOKEN_SECRET)
+  const token = jwt.sign(userId, process.env.ACCESS_TOKEN_SECRET)
   currentKey = token
   currentPassword = password
 
@@ -34,6 +34,7 @@ app.post('/identify', async (req, res) => {
       console.log(user)
       if (currentPassword === user.password) {
         console.log('Correct password')
+        res.redirect('/granted')
       } else {
         console.log('Incorrect password')
         res.redirect('/identify')
@@ -45,7 +46,7 @@ app.post('/identify', async (req, res) => {
   }
 
   //console.log(currentPassword)
-  //console.log(currentKey)
+  console.log(currentKey)
 })
 
 app.get('/identify', (req, res) => {
