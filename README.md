@@ -12,17 +12,17 @@ From here, follow the instructions for existing users below.
 
 ### EXISTING USERS
 
-To login, navigate to the "/identify" page.
-Enter your user ID and password, then click on "Login".
-If the user ID or password you entered were incorrect, you will be redirected back to the
-"/identify" page and will have to re-enter your user ID and password.
-If your login succeeded, you should be logged in and be redirected to your own welcome page.
+To login, navigate to the "/identify" page.  
+Enter your user ID and password, then click on "Login".  
+If the user ID or password you entered were incorrect, you will be redirected back to the  
+"/identify" page and will have to re-enter your user ID and password.  
+If your login succeeded, you should be logged in and be redirected to your own welcome page.  
 
 ### ACCESSING PAGES
 
-Admin can access all pages.
-Teachers can access all pages except the admin page.
-Students can access only their own page.
+Admin can access all pages.  
+Teachers can access all pages except the admin page.  
+Students can access only their own page.  
 
-If you try to access a page which you're not authorized to access, you will be redirected to the "/identify"
-page and be asked to log in again.
+If you try to access a page which you're not authorized to access, you will be redirected to the "/identify"  
+page and be asked to log in again.  
