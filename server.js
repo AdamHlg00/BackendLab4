@@ -34,6 +34,7 @@ app.post('/identify', async (req, res) => {
       console.log(user)
       if (currentPassword === user.password) {
         console.log('Correct password')
+        currentUser = user
         res.redirect('/granted')
       } else {
         console.log('Incorrect password')
@@ -44,9 +45,6 @@ app.post('/identify', async (req, res) => {
     console.log(error)
     res.sendStatus(500)
   }
-
-  //console.log(currentPassword)
-  console.log(currentKey)
 })
 
 app.get('/identify', (req, res) => {
@@ -57,7 +55,6 @@ function authenticateToken(req, res, next) {
   if (currentKey == '') {
     res.redirect('/identify')
   } else if (jwt.verify(currentKey, process.env.ACCESS_TOKEN_SECRET)) {
-    //console.log(jwt.verify(currentKey, process.env.ACCESS_TOKEN_SECRET))
     next()
   } else {
     res.redirect('/identify')
@@ -68,8 +65,12 @@ app.get('/granted', authenticateToken, (req, res) => {
   res.render('start.ejs')
 })
 
-app.get('/admin', (req, res) => {
-  res.render('admin.ejs')
+app.get('/admin', authenticateToken, (req, res) => {
+  if (currentUser.role === 'admin') {
+    res.render('admin.ejs')
+  } else {
+    res.redirect('/identify')
+  }
 })
 
 app.listen(3000)
