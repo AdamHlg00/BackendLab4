@@ -46,4 +46,14 @@ function getAllUsers() {
   })
 }
 
-module.exports = { db, getUser, getAllUsers }
+function addUser(userID, name, role, password) {
+  let stmt = db.prepare('INSERT INTO Users (userId, name, role, password) VALUES (?, ?, ?, ?)')
+  stmt.run(userID, name, role, password, (err) => {
+    if (err) {
+      throw err
+    }
+  })
+  stmt.finalize()
+}
+
+module.exports = { db, getUser, getAllUsers, addUser }

@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 require('dotenv').config()
 
 app.set('view engine', 'ejs')
@@ -15,6 +16,10 @@ let currentUser
 
 let adminRole = ['admin']
 let teacherRole = ['admin', 'teacher']
+
+// Since newly registered users' passwords are encrypted, this array is used
+// to keep track of those users whose passwords are stored in plaintext
+let originalUsers = ['id1', 'id2', 'id3', 'admin']
 
 app.get('/', (req, res) => {
   res.redirect('/identify')
@@ -33,8 +38,20 @@ app.post('/identify', async (req, res) => {
     if (!user) {
       console.log('User does not exist')
       res.redirect('/identify')
-    } else {
+    }
+
+    // Requires two different ways of checking passwords, 
+    // one for non-encrypted and one for encrypted
+    if (originalUsers.includes(userId)) {
       if (currentPassword === user.password) {
+        currentUser = user
+        res.redirect('/granted')
+      } else {
+        console.log('Incorrect password')
+        res.redirect('/identify')
+      }
+    } else {
+      if (await bcrypt.compare(currentPassword, user.password)) {
         currentUser = user
         res.redirect('/granted')
       } else {
@@ -110,6 +127,38 @@ app.get('/teacher', authenticateToken, (req, res) => {
     res.redirect('/identify')
   }
   res.render('teacher.ejs')
+})
+
+app.get('/register', (req, res) => {
+  res.render('register.ejs')
+})
+
+app.post('/register', async (req, res) => {
+  let userId = req.body.userId
+  let password = req.body.password
+  let name = req.body.name
+  let role = req.body.role
+  let encPassword
+
+  try {
+    encPassword = await bcrypt.hash(password, 10)
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
+
+  let userExist = await db.getUser(userId)
+  if (userExist) {
+    console.log('User ID unavailable')
+    res.sendStatus(400)     // If user ID is unavailable, bad request. Could also render fail.ejs
+    return
+  }
+
+  db.addUser(userId, name, role, encPassword)
+
+  // Used for debugging to make sure the new user was added
+  console.log(await db.getAllUsers())
+  res.redirect('/identify')
 })
 
 app.listen(3000)
