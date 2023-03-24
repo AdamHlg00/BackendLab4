@@ -1,5 +1,8 @@
 # BackendLab4
 
+This is a simple program where you can register an account ang log in to that account.  
+Four accounts are already available to log into from the start.
+
 ### NEW USERS
 
 To register, navigate to the "/register" page.
