@@ -4,15 +4,15 @@ const db = new sqlite3.Database(':memory:')
 const userList = [
   ['id1', 'student1', 'student', 'password'],
   ['id2', 'student2', 'student', 'password2'],
-  ['id3', 'student3', 'teacher', 'password3'],
+  ['id3', 'teacher', 'teacher', 'password3'],
   ['admin', 'admin', 'admin', 'admin']
 ]
 
 db.serialize(() => {
-  db.run('CREATE TABLE Users (userID VARCHAR(255), name VARCHAR(255), role VARCHAR(255), password VARCHAR(255))')
+  db.run('CREATE TABLE Users (userId VARCHAR(255), name VARCHAR(255), role VARCHAR(255), password VARCHAR(255))')
 
   userList.forEach((user) => {
-    let stmt = db.prepare('INSERT INTO Users (userID, name, role, password) VALUES (?, ?, ?, ?)')
+    let stmt = db.prepare('INSERT INTO Users (userId, name, role, password) VALUES (?, ?, ?, ?)')
     stmt.run(user, (err) => {
       if (err) {
         throw err
@@ -24,7 +24,7 @@ db.serialize(() => {
 
 function getUser(userID) {
   return new Promise((resolve, reject) => {
-    db.get('SELECT * FROM Users WHERE userID = ?', [userID], (err, rows) => {
+    db.get('SELECT * FROM Users WHERE userId = ?', [userID], (err, rows) => {
       if (err) {
         reject(err)
       } else {

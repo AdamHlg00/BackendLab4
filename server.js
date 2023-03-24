@@ -44,16 +44,16 @@ app.post('/identify', async (req, res) => {
     // one for non-encrypted and one for encrypted
     if (originalUsers.includes(userId)) {
       if (currentPassword === user.password) {
-        currentUser = user
-        res.redirect('/granted')
+        currentUser = await user
+        res.redirect(`/users/${currentUser.userId}`)
       } else {
         console.log('Incorrect password')
         res.redirect('/identify')
       }
     } else {
       if (await bcrypt.compare(currentPassword, user.password)) {
-        currentUser = user
-        res.redirect('/granted')
+        currentUser = await user
+        res.redirect(`/users/${currentUser.userId}`)
       } else {
         console.log('Incorrect password')
         res.redirect('/identify')
@@ -86,19 +86,19 @@ app.get('/granted', authenticateToken, (req, res) => {
 app.get('/admin', authenticateToken, async (req, res) => {
   if (!adminRole.includes(currentUser.role)) {
     res.redirect('/identify')
-  }
+  } else {
+    try {
+      let allUsers = await db.getAllUsers()
 
-  try {
-    let allUsers = await db.getAllUsers()
+      if (!allUsers) {
+        res.sendStatus(500)     // If users were not collected properly, internal server error
+      }
 
-    if (!allUsers) {
-      res.sendStatus(500)     // If users were not collected properly, internal server error
+      res.render('admin.ejs', { users: allUsers })
+    } catch (error) {
+      console.log(error)
+      res.sendStatus(500)
     }
-
-    res.render('admin.ejs', { users: allUsers })
-  } catch (error) {
-    console.log(error)
-    res.sendStatus(500)
   }
 })
 
@@ -106,27 +106,32 @@ app.get('/student1', authenticateToken, (req, res) => {
   if (!teacherRole.includes(currentUser.role)) {
     if (currentUser.name !== 'student1') {
       res.redirect('/identify')
+    } else {
+      res.render('student1.ejs')
     }
+  } else {
     res.render('student1.ejs')
   }
-  res.render('student1.ejs')
 })
 
 app.get('/student2', authenticateToken, (req, res) => {
   if (!teacherRole.includes(currentUser.role)) {
     if (currentUser.name !== 'student2') {
       res.redirect('/identify')
+    } else {
+      res.render('student2.ejs', { user: currentUser })
     }
+  } else {
     res.render('student2.ejs', { user: currentUser })
   }
-  res.render('student2.ejs', { user: currentUser })
 })
 
 app.get('/teacher', authenticateToken, (req, res) => {
   if (!teacherRole.includes(currentUser.role)) {
     res.redirect('/identify')
+  } else {
+    res.render('teacher.ejs')
   }
-  res.render('teacher.ejs')
 })
 
 app.get('/register', (req, res) => {
@@ -159,6 +164,15 @@ app.post('/register', async (req, res) => {
   // Used for debugging to make sure the new user was added
   console.log(await db.getAllUsers())
   res.redirect('/identify')
+})
+
+app.get('/users/:userId', authenticateToken, (req, res) => {
+  if (currentUser.userId === req.params.userId) {
+    res.render('dynamicView.ejs', { user: currentUser })
+  } else {
+    console.log('Incorrect user ID')
+    res.redirect('/identify')
+  }
 })
 
 app.listen(3000)
