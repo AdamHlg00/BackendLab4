@@ -19,22 +19,30 @@ app.get('/', (req, res) => {
 
 app.post('/identify', async (req, res) => {
   const userId = req.body.userId
-  const username = req.body.password
-  const token = jwt.sign(username, process.env.ACCESS_TOKEN_SECRET)
+  const password = req.body.password
+  const token = jwt.sign(password, process.env.ACCESS_TOKEN_SECRET)
   currentKey = token
-  currentPassword = username
+  currentPassword = password
 
-  let user
-  db.getUser(userId)
-    .then((result) => {
-      user = result
-      console.log(user)
-      res.redirect('/granted')
-    })
-    .catch((error) => {
-      console.log(error)
+  try {
+    let user = await db.getUser(userId)
+
+    if (!user) {
+      console.log('User does not exist')
       res.redirect('/identify')
-    })
+    } else {
+      console.log(user)
+      if (currentPassword === user.password) {
+        console.log('Correct password')
+      } else {
+        console.log('Incorrect password')
+        res.redirect('/identify')
+      }
+    }
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(500)
+  }
 
   //console.log(currentPassword)
   //console.log(currentKey)
