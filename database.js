@@ -25,9 +25,8 @@ db.serialize(() => {
 function getUser(userID) {
   return new Promise((resolve, reject) => {
     db.get('SELECT * FROM Users WHERE userID = ?', [userID], (err, rows) => {
-      if (!rows) {
-        let errorValue = 'User does not exist'
-        reject(errorValue)
+      if (err) {
+        reject(err)
       } else {
         resolve(rows)
       }
@@ -35,4 +34,16 @@ function getUser(userID) {
   })
 }
 
-module.exports = { db, getUser }
+function getAllUsers() {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT * FROM Users', [], (err, rows) => {
+      if (err) {
+        reject(err)
+      }
+
+      resolve(rows)
+    })
+  })
+}
+
+module.exports = { db, getUser, getAllUsers }

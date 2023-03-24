@@ -31,9 +31,7 @@ app.post('/identify', async (req, res) => {
       console.log('User does not exist')
       res.redirect('/identify')
     } else {
-      console.log(user)
       if (currentPassword === user.password) {
-        console.log('Correct password')
         currentUser = user
         res.redirect('/granted')
       } else {
@@ -65,12 +63,34 @@ app.get('/granted', authenticateToken, (req, res) => {
   res.render('start.ejs')
 })
 
-app.get('/admin', authenticateToken, (req, res) => {
-  if (currentUser.role === 'admin') {
-    res.render('admin.ejs')
-  } else {
+app.get('/admin', authenticateToken, async (req, res) => {
+  if (currentUser.role !== 'admin') {
     res.redirect('/identify')
   }
+  try {
+    let allUsers = await db.getAllUsers()
+
+    if (!allUsers) {
+      res.sendStatus(500)     // If users were not collected properly, internal server error
+    }
+
+    res.render('admin.ejs', { users: allUsers })
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(500)
+  }
+})
+
+app.get('/student1', authenticateToken, (req, res) => {
+  res.render('student1.ejs')
+})
+
+app.get('/student2', authenticateToken, (req, res) => {
+  res.render('student2.ejs')
+})
+
+app.get('/teacher', authenticateToken, (req, res) => {
+  res.render('teacher.ejs')
 })
 
 app.listen(3000)
