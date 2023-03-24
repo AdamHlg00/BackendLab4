@@ -2,9 +2,9 @@ const sqlite3 = require('sqlite3').verbose()
 const db = new sqlite3.Database(':memory:')
 
 const userList = [
-  ['id1', 'user1', 'student', 'password'],
-  ['id2', 'user2', 'student', 'password2'],
-  ['id3', 'user3', 'teacher', 'password3'],
+  ['id1', 'student1', 'student', 'password'],
+  ['id2', 'student2', 'student', 'password2'],
+  ['id3', 'student3', 'teacher', 'password3'],
   ['admin', 'admin', 'admin', 'admin']
 ]
 

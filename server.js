@@ -13,6 +13,9 @@ var currentKey = ''
 var currentPassword = ''
 let currentUser
 
+let adminRole = ['admin']
+let teacherRole = ['admin', 'teacher']
+
 app.get('/', (req, res) => {
   res.redirect('/identify')
 })
@@ -64,9 +67,10 @@ app.get('/granted', authenticateToken, (req, res) => {
 })
 
 app.get('/admin', authenticateToken, async (req, res) => {
-  if (currentUser.role !== 'admin') {
+  if (!adminRole.includes(currentUser.role)) {
     res.redirect('/identify')
   }
+
   try {
     let allUsers = await db.getAllUsers()
 
@@ -82,6 +86,12 @@ app.get('/admin', authenticateToken, async (req, res) => {
 })
 
 app.get('/student1', authenticateToken, (req, res) => {
+  if (!teacherRole.includes(currentUser.role)) {
+    if (currentUser.name !== 'student1') {
+      res.redirect('/identify')
+    }
+    res.render('student1.ejs')
+  }
   res.render('student1.ejs')
 })
 
