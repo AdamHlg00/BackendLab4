@@ -1,5 +1,5 @@
 # BackendLab4
-##NEW USERS:
+## NEW USERS:
 To register, navigate to the "/register" page.
 Enter your credentials and choose a role, then click "Register".
 If your chosen user ID isn't available, you will be directed to a "Bad Request" page.
