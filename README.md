@@ -10,6 +10,7 @@ re-enter your credentials, this time with another user ID.
 If your registration succeeded, you will be redirected to the login screen.  
 From here, follow the instructions for existing users below.  
 
+
 ### EXISTING USERS
 
 To login, navigate to the "/identify" page.  
