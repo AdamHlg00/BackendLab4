@@ -14,6 +14,7 @@ var currentKey = ''
 var currentPassword = ''
 let currentUser
 
+// Roles, used for easier authentication checks
 let adminRole = ['admin']
 let teacherRole = ['admin', 'teacher']
 
@@ -21,10 +22,12 @@ let teacherRole = ['admin', 'teacher']
 // to keep track of those users whose passwords are stored in plaintext
 let originalUsers = ['id1', 'id2', 'id3', 'admin']
 
+// Default route
 app.get('/', (req, res) => {
   res.redirect('/identify')
 })
 
+// Takes login information from the identify view
 app.post('/identify', async (req, res) => {
   const userId = req.body.userId
   const password = req.body.password
@@ -35,6 +38,7 @@ app.post('/identify', async (req, res) => {
   try {
     let user = await db.getUser(userId)
 
+    // Makes sure the user exists in the database
     if (!user) {
       console.log('User does not exist')
       res.redirect('/identify')
@@ -51,6 +55,7 @@ app.post('/identify', async (req, res) => {
         res.redirect('/identify')
       }
     } else {
+      // For encrypted passwords
       if (await bcrypt.compare(currentPassword, user.password)) {
         currentUser = await user
         res.redirect(`/users/${currentUser.userId}`)
@@ -65,10 +70,12 @@ app.post('/identify', async (req, res) => {
   }
 })
 
+// The identify route
 app.get('/identify', (req, res) => {
   res.render('identify.ejs')
 })
 
+// Function used to make sure there is a valid token and the user is logged in
 function authenticateToken(req, res, next) {
   if (currentKey == '') {
     res.redirect('/identify')
@@ -79,11 +86,14 @@ function authenticateToken(req, res, next) {
   }
 }
 
+// Granted route. Mostly unused when criteria for grade 5 is achieved
 app.get('/granted', authenticateToken, (req, res) => {
   res.render('start.ejs')
 })
 
+// The admin route
 app.get('/admin', authenticateToken, async (req, res) => {
+  // Checks if the current user's role is part of the andmin role
   if (!adminRole.includes(currentUser.role)) {
     res.redirect('/identify')
   } else {
@@ -102,8 +112,11 @@ app.get('/admin', authenticateToken, async (req, res) => {
   }
 })
 
+// The student1 route
 app.get('/student1', authenticateToken, (req, res) => {
+  // Checks if the current user's role is part of the teacher role
   if (!teacherRole.includes(currentUser.role)) {
+    // If not teacher, check if it's the correct student
     if (currentUser.name !== 'student1') {
       res.redirect('/identify')
     } else {
@@ -114,8 +127,11 @@ app.get('/student1', authenticateToken, (req, res) => {
   }
 })
 
+// The student2 route
 app.get('/student2', authenticateToken, (req, res) => {
+  // Checks if the current user's role is part of the teacher role
   if (!teacherRole.includes(currentUser.role)) {
+    // If not teacher, check if it's the correct student
     if (currentUser.name !== 'student2') {
       res.redirect('/identify')
     } else {
@@ -126,7 +142,9 @@ app.get('/student2', authenticateToken, (req, res) => {
   }
 })
 
+// The teacher route
 app.get('/teacher', authenticateToken, (req, res) => {
+  // Checks if the current user's role is part of the teacher role
   if (!teacherRole.includes(currentUser.role)) {
     res.redirect('/identify')
   } else {
@@ -134,10 +152,12 @@ app.get('/teacher', authenticateToken, (req, res) => {
   }
 })
 
+// The register route
 app.get('/register', (req, res) => {
   res.render('register.ejs')
 })
 
+// Takes account credentials as input from the register view
 app.post('/register', async (req, res) => {
   let userId = req.body.userId
   let password = req.body.password
@@ -146,6 +166,7 @@ app.post('/register', async (req, res) => {
   let encPassword
 
   try {
+    // Encrypts the password
     encPassword = await bcrypt.hash(password, 10)
   } catch (error) {
     console.log(error)
@@ -153,12 +174,14 @@ app.post('/register', async (req, res) => {
   }
 
   let userExist = await db.getUser(userId)
+  // Checks if the user ID is available
   if (userExist) {
     console.log('User ID unavailable')
     res.sendStatus(400)     // If user ID is unavailable, bad request. Could also render fail.ejs
     return
   }
 
+  // Adds user to database
   db.addUser(userId, name, role, encPassword)
 
   // Used for debugging to make sure the new user was added
@@ -166,7 +189,9 @@ app.post('/register', async (req, res) => {
   res.redirect('/identify')
 })
 
+// The dynamic user route
 app.get('/users/:userId', authenticateToken, (req, res) => {
+  // Checks if the current user's user ID is the same as the route it's trying to access.
   if (currentUser.userId === req.params.userId) {
     res.render('dynamicView.ejs', { user: currentUser })
   } else {
